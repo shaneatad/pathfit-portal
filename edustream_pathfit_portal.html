@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduStream PATHFIT Portal | College Physical Education</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                50: '#f0f4fe',
+                100: '#e0e9fd',
+                200: '#c2d5fc',
+                300: '#94b7fa',
+                400: '#6091f6',
+                500: '#3b6bf1',
+                600: '#254be6',
+                700: '#1d39d3',
+                800: '#1e3a8a',
+                900: '#1e2b87',
+                950: '#0a0e1a'
+              }
+            },
+            fontFamily: {
+              google: ['Google Sans', 'Inter', 'sans-serif'],
+              mono: ['Fira Code', 'Courier New', 'monospace']
+            }
+          }
+        }
+      }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel standalone for JSX processing -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .font-google {
+            font-family: 'Google Sans', sans-serif;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(37, 99, 235, 0.18);
+            box-shadow: 0 10px 30px -5px rgba(30, 58, 138, 0.08);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            backdrop-filter: blur(12px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 12px 24px -4px rgba(30, 58, 138, 0.12);
+        }
+
+        .btn-navy-primary {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border: 1px solid #1e40af;
+            box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
+            transition: all 0.25s ease;
+        }
+        .btn-navy-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body class="bg-blue-50/50 text-slate-900 antialiased min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+    <div id="root" class="min-h-screen flex flex-col"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        const INITIAL_REGISTERED_ACCOUNTS = [
+            {
+                id: 'usr-admin-1',
+                studentIdNo: 'ADM-2025-001',
+                name: 'Shane Ian Atad',
+                nickname: 'Prof. Shane',
+                role: 'admin', // 'admin' | 'teacher' | 'student'
+                isPrimaryAdmin: true,
+                dob: '1992-05-14',
+                gender: 'Male',
+                email: 'shane.atad@college.edu.ph',
+                courseProgram: 'Department of Physical Education & PATHFIT',
+                sectionName: 'PE Department Head',
+                sectionId: 'sec-pf1-bsit1a',
+                enrolledSectionIds: ['sec-pf1-bsit1a', 'sec-pf1-bsn1b', 'sec-pf4-bscs4a'],
+                emergencyContact: 'Mrs. Atad (+63 917 555 0192)',
+                adviser: 'Dr. Roberto Santos (Dean of Sports)',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+                status: 'Approved'
+            },
+            {
+                id: 'usr-teacher-2',
+                studentIdNo: 'FAC-2025-012',
+                name: 'Dr. Clara Reyes',
+                nickname: 'Doc Clara',
+                role: 'teacher',
+                isPrimaryAdmin: false,
+                dob: '1988-09-22',
+                gender: 'Female',
+                email: 'clara.reyes@college.edu.ph',
+                courseProgram: 'Sports Science & Kinesiology Dept.',
+                sectionName: 'Assistant PE Professor',
+                sectionId: 'sec-pf4-bscs4a',
+                enrolledSectionIds: ['sec-pf4-bscs4a'],
+                emergencyContact: 'Dr. Reyes (+63 919 444 8811)',
+                adviser: 'Prof. Shane Ian Atad',
+                avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80',
+                status: 'Approved'
+            },
+            {
+                id: 'std-101',
+                studentIdNo: '2025-01892',
+                name: 'Justin Mercado',
+                nickname: 'Justin',
+                role: 'student',
+                isPrimaryAdmin: false,
+                dob: '2005-08-12',
+                gender: 'Male',
+                email: 'j.mercado@student.edu.ph',
+                courseProgram: 'BS Information Technology',
+                sectionName: 'BSIT-1A',
+                sectionId: 'sec-pf1-bsit1a',
+                enrolledSectionIds: ['sec-pf1-bsit1a'],
+                emergencyContact: 'Elena Mercado (Mother) - +63 918 222 3344',
+                adviser: 'Engr. Aris Thorne',
+                avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
+                status: 'Approved'
+            },
+            {
+                id: 'std-102',
+                studentIdNo: '2025-02144',
+                name: 'Bea Alonzo',
+                nickname: 'Bea',
+                role: 'student',
+                isPrimaryAdmin: false,
+                dob: '2004-11-20',
+                gender: 'Female',
+                email: 'b.alonzo@student.edu.ph',
+                courseProgram: 'BS Computer Science',
+                sectionName: 'BSCS-4A',
+                sectionId: 'sec-pf4-bscs4a',
+                enrolledSectionIds: ['sec-pf4-bscs4a'],
+                emergencyContact: 'Roberto Alonzo (Father) - +63 920 444 5566',
+                adviser: 'Dr. Clara Reyes',
+                avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
+                status: 'Approved'
+            }
+        ];
+
+        const INITIAL_SECTIONS = [
+            {
+                id: 'sec-pf1-bsit1a',
+                subjectCode: 'PATHFIT 1',
+                subjectTitle: 'Movement Competency Training',
+                sectionName: 'BSIT-1A',
+                courseProgram: 'BS Information Technology',
+                room: 'College Gymnasium / Court A',
+                schedule: 'Mon / Thu 8:00 AM - 10:00 AM',
+                joinCode: 'PF1-IT1A',
+                instructor: 'Shane Ian Atad',
+                color: 'from-blue-700 via-blue-800 to-blue-950',
+                categories: ['Fitness Assessments', 'Video Performance', 'Movement Workouts', 'Practical Exams']
+            },
+            {
+                id: 'sec-pf1-bsn1b',
+                subjectCode: 'PATHFIT 1',
+                subjectTitle: 'Movement Competency Training',
+                sectionName: 'BSN-1B',
+                courseProgram: 'BS Nursing',
+                room: 'College Gymnasium / Court B',
+                schedule: 'Tue / Fri 10:00 AM - 12:00 PM',
+                joinCode: 'PF1-N1B',
+                instructor: 'Shane Ian Atad',
+                color: 'from-blue-800 via-indigo-900 to-blue-950',
+                categories: ['Fitness Assessments', 'Video Performance', 'Movement Workouts']
+            },
+            {
+                id: 'sec-pf4-bscs4a',
+                subjectCode: 'PATHFIT 4',
+                subjectTitle: 'Physical Activities Towards Health & Fitness IV (Sports)',
+                sectionName: 'BSCS-4A',
+                courseProgram: 'BS Computer Science',
+                room: 'Sports Complex Court 1',
+                schedule: 'Wed / Sat 1:00 PM - 3:00 PM',
+                joinCode: 'PF4-CS4A',
+                instructor: 'Shane Ian Atad',
+                color: 'from-blue-900 via-blue-800 to-sky-950',
+                categories: ['Sports Skill Testing', 'Activity Logs', 'Team Practica', 'Reflections']
+            }
+        ];
+
+        const INITIAL_PENDING_ENROLLMENTS = [
+            {
+                id: 'req-1',
+                studentId: 'std-104',
+                studentIdNo: '2025-04512',
+                studentName: 'Samantha Cruz',
+                nickname: 'Sam',
+                email: 's.cruz@student.edu.ph',
+                courseProgram: 'BS Information Technology',
+                requestedSectionId: 'sec-pf1-bsit1a',
+                requestedSubject: 'PATHFIT 1 (BSIT-1A)',
+                joinCodeUsed: 'PF1-IT1A',
+                requestedAt: '2026-07-22 08:30 AM'
+            }
+        ];
+
+        const INITIAL_ASSIGNMENTS = [
+            {
+                id: 'asg-pf1-1',
+                sectionId: 'sec-pf1-bsit1a',
+                subjectCode: 'PATHFIT 1',
+                category: 'Fitness Assessments',
+                title: '3-Minute Step Test & Baseline Physical Audit',
+                instructions: 'Perform the standardized 3-Minute Step Test and record resting vs. 1-minute recovery pulse rates. Submit your signed PDF Fitness Log along with a brief photo/video clip showing your form execution.',
+                points: 100,
+                dueDate: '2026-08-10',
+                createdAt: '2026-07-20',
+                handouts: [
+                    { title: 'PATHFIT1_Fitness_Assessment_Guide.pdf', size: '540 KB', type: 'pdf' },
+                    { title: 'Target_Heart_Rate_Zone_Table.pdf', size: '280 KB', type: 'pdf' }
+                ]
+            }
+        ];
+
+        const INITIAL_MATERIALS = [
+            {
+                id: 'mat-1',
+                sectionId: 'sec-pf1-bsit1a',
+                subjectCode: 'PATHFIT 1',
+                title: 'Module 1: Principles of Movement Competency & Dynamic Warm-Up',
+                description: 'Essential reading material for PATHFIT 1 students covering dynamic stretches, joint mobility drills, and injury prevention.',
+                postedAt: '2026-07-18',
+                fileUrl: 'PATHFIT1_Module1_Movement_Competency.pdf',
+                fileSize: '2.4 MB'
+            }
+        ];
+
+        const INITIAL_ANNOUNCEMENTS = [
+            {
+                id: 'ann-1',
+                sectionId: 'sec-pf1-bsit1a',
+                author: 'Shane Ian Atad',
+                title: 'Welcome to PATHFIT 1 Movement Competency!',
+                content: 'Good day class! Please wear your complete PE uniform during our gym sessions on Mondays. Ensure you complete your Baseline Physical Assessment Form before our practical exam.',
+                date: '2026-07-18 09:00 AM',
+                comments: [
+                    { id: 'cmt-1', author: 'Justin Mercado', text: 'Noted, Sir Shane! Where do we download the assessment form?', time: '2026-07-18 09:15 AM' }
+                ]
+            }
+        ];
+
+        const INITIAL_SUBMISSIONS = [
+            {
+                id: 'sub-101',
+                assignmentId: 'asg-pf1-1',
+                studentId: 'std-101',
+                studentName: 'Justin Mercado',
+                studentIdNo: '2025-01892',
+                courseProgram: 'BS Information Technology',
+                sectionName: 'BSIT-1A',
+                submittedAt: '2026-07-21 02:30 PM',
+                status: 'Turned In',
+                grade: 95,
+                feedback: 'Excellent heart rate recovery rate! Form on the step test was steady and well-controlled.',
+                attachments: [
+                    {
+                        id: 'att-1',
+                        name: 'Justin_Mercado_PATHFIT1_Fitness_Log.pdf',
+                        type: 'pdf',
+                        title: 'PATHFIT 1 - INDIVIDUAL PHYSICAL FITNESS AUDIT REPORT',
+                        content: `STUDENT: Justin Mercado\nSTUDENT ID: 2025-01892\nPROGRAM & SECTION: BS Information Technology (BSIT-1A)\nINSTRUCTOR: Prof. Shane Ian Atad\n\n1. ANTHROPOMETRIC METRICS\n- Height: 175 cm | Weight: 68 kg | BMI: 22.2 (Normal Category)\n- Resting Heart Rate: 64 bpm\n- Post 3-Min Step Test Recovery Pulse: 108 bpm`
+                    }
+                ]
+            }
+        ];
+
+        function StudentSubmitModal({ assignment, currentUser, activeSection, onSubmit, onClose }) {
+            const [attachMode, setAttachMode] = useState('file');
+            const [attachments, setAttachments] = useState([
+                {
+                    id: 'att-default-1',
+                    name: `${currentUser.name.replace(/\s+/g, '_')}_${assignment.subjectCode || 'PATHFIT'}_Log.pdf`,
+                    type: 'pdf',
+                    title: assignment.title,
+                    content: `STUDENT: ${currentUser.name}\nSECTION: ${activeSection.sectionName}\nTASK: ${assignment.title}\nSTATUS: Verified Student Work Submission.`
+                }
+            ]);
+            
+            const [linkUrl, setLinkUrl] = useState('');
+            const [linkTitle, setLinkTitle] = useState('');
+            const [remarks, setRemarks] = useState('');
+            const [isConfirmed, setIsConfirmed] = useState(false);
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                let fileType = 'file';
+                if (file.type.includes('image')) fileType = 'image';
+                else if (file.type.includes('pdf')) fileType = 'pdf';
+                else if (file.type.includes('video')) fileType = 'video';
+
+                const newAtt = {
+                    id: 'att-' + Date.now(),
+                    name: file.name,
+                    type: fileType,
+                    size: (file.size / 1024).toFixed(1) + ' KB',
+                    url: fileType === 'image' ? URL.createObjectURL(file) : null,
+                    content: `Attached file: ${file.name} (${file.type || 'Binary'})`
+                };
+
+                setAttachments(prev => [...prev, newAtt]);
+            };
+
+            const handleAddLink = () => {
+                if (!linkUrl.trim()) return;
+                const formattedUrl = linkUrl.startsWith('http') ? linkUrl : 'https://' + linkUrl;
+                const newAtt = {
+                    id: 'att-' + Date.now(),
+                    name: linkTitle.trim() || linkUrl,
+                    type: 'link',
+                    url: formattedUrl,
+                    content: `External Web/Cloud Link: ${formattedUrl}`
+                };
+                setAttachments(prev => [...prev, newAtt]);
+                setLinkUrl('');
+                setLinkTitle('');
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!isConfirmed) return;
+
+                const newSub = {
+                    id: 'sub-' + Date.now(),
+                    assignmentId: assignment.id,
+                    studentId: currentUser.id || 'std-101',
+                    studentName: currentUser.name,
+                    studentIdNo: currentUser.studentIdNo || '2025-01892',
+                    courseProgram: currentUser.courseProgram || activeSection.courseProgram,
+                    sectionName: activeSection.sectionName,
+                    submittedAt: new Date().toLocaleString(),
+                    status: 'Turned In',
+                    grade: null,
+                    feedback: remarks ? `Student note: ${remarks}` : '',
+                    attachments: attachments
+                };
+
+                onSubmit(newSub);
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="glass-card rounded-3xl max-w-lg w-full p-6 border border-blue-200 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+                        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                            <div>
+                                <h3 className="font-google font-bold text-lg text-blue-950 flex items-center">
+                                    <i className="fa-solid fa-cloud-arrow-up text-blue-600 mr-2"></i>
+                                    Turn In Assignment
+                                </h3>
+                                <span className="text-xs text-blue-800 font-bold">{assignment.title} ({assignment.points} pts)</span>
+                            </div>
+                            <button onClick={onClose} className="text-slate-400 hover:text-slate-700">
+                                <i className="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 text-xs">
+                            <label className="block font-bold text-slate-700">Add Attachments</label>
+                            
+                            <div className="flex space-x-2 bg-slate-100 p-1 rounded-xl">
+                                <button
+                                    type="button"
+                                    onClick={() => setAttachMode('file')}
+                                    className={`flex-1 py-1.5 rounded-lg font-bold transition flex items-center justify-center space-x-1.5 ${
+                                        attachMode === 'file' ? 'bg-white text-blue-900 shadow' : 'text-slate-600 hover:text-blue-900'
+                                    }`}
+                                >
+                                    <i className="fa-solid fa-paperclip"></i>
+                                    <span>Upload File</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setAttachMode('link')}
+                                    className={`flex-1 py-1.5 rounded-lg font-bold transition flex items-center justify-center space-x-1.5 ${
+                                        attachMode === 'link' ? 'bg-white text-blue-900 shadow' : 'text-slate-600 hover:text-blue-900'
+                                    }`}
+                                >
+                                    <i className="fa-solid fa-link"></i>
+                                    <span>Add Link</span>
+                                </button>
+                            </div>
+
+                            {attachMode === 'file' ? (
+                                <div className="bg-blue-50/70 border border-blue-200 p-3 rounded-2xl space-y-2 text-center">
+                                    <i className="fa-solid fa-file-arrow-up text-blue-600 text-2xl mb-1"></i>
+                                    <p className="text-slate-600 font-medium">Select JPEG, PNG, PDF, or MP4 video</p>
+                                    <input
+                                        type="file"
+                                        accept="image/*,.pdf,.doc,.docx,.mp4,.mov"
+                                        onChange={handleFileUpload}
+                                        className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-700 file:text-white cursor-pointer"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="bg-blue-50/70 border border-blue-200 p-3 rounded-2xl space-y-2">
+                                    <input
+                                        value={linkTitle}
+                                        onChange={(e) => setLinkTitle(e.target.value)}
+                                        placeholder="Link Title (e.g. Google Drive Workout Video)"
+                                        className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs"
+                                    />
+                                    <div className="flex space-x-2">
+                                        <input
+                                            value={linkUrl}
+                                            onChange={(e) => setLinkUrl(e.target.value)}
+                                            placeholder="Paste URL (e.g. https://drive.google.com/...)"
+                                            className="flex-1 bg-white border border-slate-300 rounded-xl p-2.5 text-xs"
+                                        />
+                                        <button type="button" onClick={handleAddLink} className="btn-navy-primary font-bold px-4 rounded-xl text-xs">Attach</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="space-y-1.5">
+                                <span className="font-bold text-slate-700 text-[11px] uppercase tracking-wider block">Attachments ({attachments.length}):</span>
+                                {attachments.map((att) => (
+                                    <div key={att.id} className="bg-white border border-slate-200 p-2.5 rounded-xl flex items-center justify-between text-xs">
+                                        <div className="truncate max-w-[80%]">
+                                            <span className="font-bold text-slate-800 block truncate">{att.name}</span>
+                                            <span className="text-[10px] text-slate-400 font-mono">{att.type.toUpperCase()}</span>
+                                        </div>
+                                        <button type="button" onClick={() => setAttachments(attachments.filter(a => a.id !== att.id))} className="text-slate-400 hover:text-rose-600">
+                                            <i className="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div>
+                                <label className="block font-bold text-slate-700 mb-1">Remarks for Instructor</label>
+                                <textarea
+                                    value={remarks}
+                                    onChange={(e) => setRemarks(e.target.value)}
+                                    rows="2"
+                                    placeholder="Optional notes or exercise reflections..."
+                                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800"
+                                ></textarea>
+                            </div>
+
+                            <div className={`p-3.5 rounded-2xl border transition-all ${isConfirmed ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 border-amber-300'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2.5 pr-2">
+                                        <i className={`fa-solid ${isConfirmed ? 'fa-check text-emerald-600' : 'fa-triangle-exclamation text-amber-600'} text-lg`}></i>
+                                        <div>
+                                            <h4 className="font-bold text-xs">Verification Check</h4>
+                                            <p className="text-[11px] text-slate-600">Toggle switch to confirm final turn-in.</p>
+                                        </div>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                        <input type="checkbox" checked={isConfirmed} onChange={(e) => setIsConfirmed(e.target.checked)} className="sr-only peer" />
+                                        <div className="w-12 h-6 bg-slate-300 rounded-full peer peer-checked:bg-emerald-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+                            <button type="button" onClick={onClose} className="px-4 py-2 font-bold text-slate-500 text-xs">Cancel</button>
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                disabled={!isConfirmed}
+                                className={`px-5 py-2 font-bold rounded-xl text-xs flex items-center space-x-1.5 transition ${
+                                    isConfirmed ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                }`}
+                            >
+                                <i className="fa-solid fa-paper-plane"></i>
+                                <span>Submit Work Now</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const getInitialState = (key, fallback) => {
+                try {
+                    const saved = localStorage.getItem(key);
+                    return saved ? JSON.parse(saved) : fallback;
+                } catch (e) {
+                    return fallback;
+                }
+            };
+
+            // Global Accounts & Active User State
+            const [accounts, setAccounts] = useState(() => getInitialState('pathfit_accounts_registry_v2', INITIAL_REGISTERED_ACCOUNTS));
+            const [currentUserId, setCurrentUserId] = useState(() => getInitialState('pathfit_active_userid_v2', 'usr-admin-1'));
+
+            // Core Application Data State
+            const [sections, setSections] = useState(() => getInitialState('pathfit_sections', INITIAL_SECTIONS));
+            const [activeSectionId, setActiveSectionId] = useState(() => getInitialState('pathfit_activeSectionId', 'sec-pf1-bsit1a'));
+            const [assignments, setAssignments] = useState(() => getInitialState('pathfit_assignments', INITIAL_ASSIGNMENTS));
+            const [materials, setMaterials] = useState(() => getInitialState('pathfit_materials', INITIAL_MATERIALS));
+            const [announcements, setAnnouncements] = useState(() => getInitialState('pathfit_announcements', INITIAL_ANNOUNCEMENTS));
+            const [submissions, setSubmissions] = useState(() => getInitialState('pathfit_submissions', INITIAL_SUBMISSIONS));
+            const [pendingRequests, setPendingRequests] = useState(() => getInitialState('pathfit_pendingRequests', INITIAL_PENDING_ENROLLMENTS));
+
+            useEffect(() => { localStorage.setItem('pathfit_accounts_registry_v2', JSON.stringify(accounts)); }, [accounts]);
+            useEffect(() => { localStorage.setItem('pathfit_active_userid_v2', JSON.stringify(currentUserId)); }, [currentUserId]);
+            useEffect(() => { localStorage.setItem('pathfit_sections', JSON.stringify(sections)); }, [sections]);
+            useEffect(() => { localStorage.setItem('pathfit_activeSectionId', JSON.stringify(activeSectionId)); }, [activeSectionId]);
+            useEffect(() => { localStorage.setItem('pathfit_assignments', JSON.stringify(assignments)); }, [assignments]);
+            useEffect(() => { localStorage.setItem('pathfit_materials', JSON.stringify(materials)); }, [materials]);
+            useEffect(() => { localStorage.setItem('pathfit_announcements', JSON.stringify(announcements)); }, [announcements]);
+            useEffect(() => { localStorage.setItem('pathfit_submissions', JSON.stringify(submissions)); }, [submissions]);
+            useEffect(() => { localStorage.setItem('pathfit_pendingRequests', JSON.stringify(pendingRequests)); }, [pendingRequests]);
+
+            // Compute Current Persona & Role Capabilities
+            const currentUser = useMemo(() => {
+                const found = accounts.find(a => a.id === currentUserId);
+                return found || accounts[0] || INITIAL_REGISTERED_ACCOUNTS[0];
+            }, [accounts, currentUserId]);
+
+            const isAdmin = currentUser.role === 'admin';
+            const isTeacher = currentUser.role === 'teacher' || currentUser.role === 'admin';
+
+            // Navigation & Filter UI States
+            const [activeTab, setActiveTab] = useState('stream'); // 'stream' | 'classwork' | 'manuals' | 'grading' | 'roster' | 'accounts'
+            const [selectedCategory, setSelectedCategory] = useState('All');
+            const [newCommentText, setNewCommentText] = useState({});
+
+            // Form Inputs for Registration
+            const [regForm, setRegForm] = useState({
+                name: '',
+                nickname: '',
+                studentIdNo: '',
+                role: 'student',
+                email: '',
+                courseProgram: 'BS Information Technology',
+                sectionName: 'BSIT-1A',
+                dob: '2005-01-01',
+                gender: 'Male',
+                emergencyContact: '',
+                adviser: 'Prof. Shane Ian Atad'
+            });
+            const [regMessage, setRegMessage] = useState('');
+
+            // Action Modals State
+            const [isProfileOpen, setIsProfileOpen] = useState(false);
+            const [isPendingRequestsModalOpen, setIsPendingRequestsModalOpen] = useState(false);
+            const [isJoinByCodeModalOpen, setIsJoinByCodeModalOpen] = useState(false);
+            const [isAddSubjectOpen, setIsAddSubjectOpen] = useState(false);
+            const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
+            const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
+            const [isCreateAssignmentOpen, setIsCreateAssignmentOpen] = useState(false);
+            const [isPostAnnouncementOpen, setIsPostAnnouncementOpen] = useState(false);
+            const [isAddMaterialOpen, setIsAddMaterialOpen] = useState(false);
+            const [transferAdminTarget, setTransferAdminTarget] = useState(null);
+
+            const [deleteTarget, setDeleteTarget] = useState(null);
+            const [submitAssignmentTarget, setSubmitAssignmentTarget] = useState(null);
+            const [inspectSubmission, setInspectSubmission] = useState(null);
+
+            const [joinCodeInput, setJoinCodeInput] = useState('');
+            const [enrollmentStatusMsg, setEnrollmentStatusMsg] = useState('');
+            const [newCategoryInput, setNewCategoryInput] = useState('');
+
+            // Section Filter by Role Context
+            const visibleSections = useMemo(() => {
+                if (isTeacher) return sections;
+                const enrolledIds = currentUser.enrolledSectionIds || [currentUser.sectionId];
+                return sections.filter(sec => enrolledIds.includes(sec.id));
+            }, [isTeacher, sections, currentUser]);
+
+            const activeSection = useMemo(() => {
+                const found = visibleSections.find(s => s.id === activeSectionId);
+                return found || visibleSections[0] || sections[0];
+            }, [visibleSections, activeSectionId, sections]);
+
+            useEffect(() => {
+                if (!visibleSections.some(s => s.id === activeSectionId) && visibleSections.length > 0) {
+                    setActiveSectionId(visibleSections[0].id);
+                }
+            }, [visibleSections, activeSectionId]);
+
+            // Section Content Collections
+            const sectionAnnouncements = announcements.filter(a => a.sectionId === activeSection.id);
+            const sectionAssignments = assignments.filter(a => a.sectionId === activeSection.id);
+            const sectionMaterials = materials.filter(m => m.sectionId === activeSection.id);
+            const sectionStudents = accounts.filter(s => (s.role === 'student' && s.sectionId === activeSection.id) || (s.enrolledSectionIds && s.enrolledSectionIds.includes(activeSection.id)));
+
+            const filteredAssignments = selectedCategory === 'All'
+                ? sectionAssignments
+                : sectionAssignments.filter(a => a.category === selectedCategory);
+
+            const handleRegisterAccount = (e) => {
+                e.preventDefault();
+                if (!regForm.name || !regForm.email || !regForm.studentIdNo) {
+                    setRegMessage('Please fill out all required fields.');
+                    return;
+                }
+
+                const newAccount = {
+                    id: 'usr-' + Date.now(),
+                    studentIdNo: regForm.studentIdNo,
+                    name: regForm.name,
+                    nickname: regForm.nickname || regForm.name.split(' ')[0],
+                    role: regForm.role,
+                    isPrimaryAdmin: false,
+                    dob: regForm.dob,
+                    gender: regForm.gender,
+                    email: regForm.email,
+                    courseProgram: regForm.courseProgram,
+                    sectionName: regForm.sectionName,
+                    sectionId: activeSection.id,
+                    enrolledSectionIds: [activeSection.id],
+                    emergencyContact: regForm.emergencyContact || 'Parent/Guardian - Contact on File',
+                    adviser: regForm.adviser || 'Prof. Shane Ian Atad',
+                    avatar: `https://images.unsplash.com/photo-${1535713875002 + accounts.length}?auto=format&fit=crop&w=150&q=80`,
+                    status: 'Approved'
+                };
+
+                setAccounts(prev => [...prev, newAccount]);
+                setCurrentUserId(newAccount.id);
+                setRegMessage(`Account created successfully for ${newAccount.name}! Logged in as ${newAccount.role.toUpperCase()}.`);
+                
+                setRegForm({
+                    name: '',
+                    nickname: '',
+                    studentIdNo: '',
+                    role: 'student',
+                    email: '',
+                    courseProgram: 'BS Information Technology',
+                    sectionName: 'BSIT-1A',
+                    dob: '2005-01-01',
+                    gender: 'Male',
+                    emergencyContact: '',
+                    adviser: 'Prof. Shane Ian Atad'
+                });
+            };
+
+            // DYNAMIC ADMIN ROLE TOGGLE / PROMOTION
+            const handleToggleAccountRole = (accId, newRole) => {
+                setAccounts(prev => prev.map(a => {
+                    if (a.id === accId) {
+                        return { ...a, role: newRole };
+                    }
+                    return a;
+                }));
+            };
+
+            // DYNAMIC PRIMARY ADMIN TRANSFER
+            const handleTransferPrimaryAdmin = (targetUserId) => {
+                setAccounts(prev => prev.map(a => {
+                    if (a.id === targetUserId) {
+                        return { ...a, role: 'admin', isPrimaryAdmin: true };
+                    }
+                    return { ...a, isPrimaryAdmin: false };
+                }));
+                setTransferAdminTarget(null);
+            };
+
+            const handleEnrollByCode = (code) => {
+                if (!code.trim()) return;
+                const targetSec = sections.find(s => s.joinCode.toLowerCase() === code.trim().toLowerCase());
+                
+                if (!targetSec) {
+                    setEnrollmentStatusMsg('Invalid Join Code. Please check with your instructor.');
+                    return;
+                }
+
+                if (currentUser.enrolledSectionIds && currentUser.enrolledSectionIds.includes(targetSec.id)) {
+                    setEnrollmentStatusMsg(`You are already enrolled in ${targetSec.subjectCode} (${targetSec.sectionName})!`);
+                    return;
+                }
+
+                const newReq = {
+                    id: 'req-' + Date.now(),
+                    studentId: currentUser.id,
+                    studentIdNo: currentUser.studentIdNo,
+                    studentName: currentUser.name,
+                    nickname: currentUser.nickname,
+                    email: currentUser.email,
+                    courseProgram: currentUser.courseProgram,
+                    requestedSectionId: targetSec.id,
+                    requestedSubject: `${targetSec.subjectCode} (${targetSec.sectionName})`,
+                    joinCodeUsed: code.toUpperCase(),
+                    requestedAt: new Date().toLocaleString()
+                };
+
+                setPendingRequests(prev => [newReq, ...prev]);
+                setEnrollmentStatusMsg(`Join request sent for approval!`);
+                setJoinCodeInput('');
+            };
+
+            const handleApproveRequest = (req) => {
+                setAccounts(prev => prev.map(std => {
+                    if (std.id === req.studentId) {
+                        const updatedEnrolled = [...(std.enrolledSectionIds || [std.sectionId]), req.requestedSectionId];
+                        return { ...std, enrolledSectionIds: updatedEnrolled };
+                    }
+                    return std;
+                }));
+                setPendingRequests(prev => prev.filter(r => r.id !== req.id));
+            };
+
+            const handleAddComment = (announcementId) => {
+                const text = newCommentText[announcementId];
+                if (!text || !text.trim()) return;
+
+                const newCmt = {
+                    id: 'cmt-' + Date.now(),
+                    author: currentUser.name,
+                    text: text.trim(),
+                    time: 'Just now'
+                };
+
+                setAnnouncements(prev => prev.map(ann => {
+                    if (ann.id === announcementId) {
+                        return { ...ann, comments: [...ann.comments, newCmt] };
+                    }
+                    return ann;
+                }));
+
+                setNewCommentText(prev => ({ ...prev, [announcementId]: '' }));
+            };
+
+            const handleSaveGrade = (submissionId, grade, feedback) => {
+                setSubmissions(prev => prev.map(sub => {
+                    if (sub.id === submissionId) {
+                        return { ...sub, grade, feedback, status: 'Graded' };
+                    }
+                    return sub;
+                }));
+            };
+
+            return (
+                <div className="flex-1 flex flex-col min-h-screen">
+                    {}
+                    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-blue-100 shadow-sm">
+                        <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+                            <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-2.5">
+                                    <div className="w-10 h-10 rounded-2xl btn-navy-primary flex items-center justify-center text-white font-black shadow-md shrink-0">
+                                        <i className="fa-solid fa-dumbbell text-lg"></i>
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <span className="font-google font-extrabold text-blue-950 text-base tracking-tight block">PATHFIT Portal</span>
+                                        <span className="text-[10px] font-bold text-blue-600 block -mt-1 tracking-wider uppercase">College Physical Education</span>
+                                    </div>
+                                </div>
+
+                                <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
+                                <div className="flex items-center space-x-1.5">
+                                    <select
+                                        value={activeSection.id}
+                                        onChange={(e) => {
+                                            setActiveSectionId(e.target.value);
+                                            setSelectedCategory('All');
+                                        }}
+                                        className="bg-blue-50/80 hover:bg-blue-100/80 border border-blue-200 text-blue-950 text-xs font-extrabold rounded-xl py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition shadow-sm max-w-[180px] sm:max-w-xs truncate"
+                                    >
+                                        {visibleSections.map(sec => (
+                                            <option key={sec.id} value={sec.id}>
+                                                {sec.subjectCode} — {sec.sectionName} ({sec.courseProgram})
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {isTeacher && (
+                                        <div className="flex items-center space-x-1">
+                                            <button
+                                                onClick={() => setIsAddSubjectOpen(true)}
+                                                className="btn-navy-primary px-2.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1"
+                                                title="Add New Subject"
+                                            >
+                                                <i className="fa-solid fa-plus text-[10px]"></i>
+                                                <span className="hidden lg:inline">Subject</span>
+                                            </button>
+
+                                            <button
+                                                onClick={() => setIsAddSectionOpen(true)}
+                                                className="bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 px-2.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1"
+                                                title="Add Section"
+                                            >
+                                                <i className="fa-solid fa-folder-plus text-[10px]"></i>
+                                                <span className="hidden lg:inline">Section</span>
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {!isTeacher && (
+                                        <button
+                                            onClick={() => {
+                                                setEnrollmentStatusMsg('');
+                                                setIsJoinByCodeModalOpen(true);
+                                            }}
+                                            className="btn-navy-primary px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1"
+                                        >
+                                            <i className="fa-solid fa-key text-[10px]"></i>
+                                            <span className="hidden sm:inline">Join Class</span>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2 sm:space-x-3">
+                                {/* Account Persona Quick Selector */}
+                                <div className="hidden md:flex items-center space-x-2 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase px-2">Account Persona:</span>
+                                    <select
+                                        value={currentUser.id}
+                                        onChange={(e) => setCurrentUserId(e.target.value)}
+                                        className="bg-white border border-slate-200 rounded-xl px-2 py-1 text-xs font-bold text-blue-950 focus:outline-none"
+                                    >
+                                        {accounts.map(acc => (
+                                            <option key={acc.id} value={acc.id}>
+                                                {acc.name} ({acc.role.toUpperCase()})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {isTeacher && (
+                                    <button
+                                        onClick={() => setIsPendingRequestsModalOpen(true)}
+                                        className="relative p-2 rounded-xl bg-blue-50 text-blue-900 hover:bg-blue-100 border border-blue-200 transition"
+                                        title="Pending Class Requests"
+                                    >
+                                        <i className="fa-solid fa-user-clock text-base"></i>
+                                        {pendingRequests.length > 0 && (
+                                            <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center animate-pulse shadow">
+                                                {pendingRequests.length}
+                                            </span>
+                                        )}
+                                    </button>
+                                )}
+
+                                <button
+                                    onClick={() => setIsProfileOpen(true)}
+                                    className="flex items-center space-x-2 bg-white hover:bg-blue-50 border border-slate-200 rounded-2xl p-1 pr-3 transition shadow-sm"
+                                >
+                                    <img
+                                        src={currentUser.avatar}
+                                        alt={currentUser.name}
+                                        className="w-8 h-8 rounded-xl object-cover border border-blue-300"
+                                    />
+                                    <div className="text-left hidden lg:block">
+                                        <span className="font-bold text-xs text-blue-950 block leading-tight">{currentUser.name}</span>
+                                        <span className="text-[10px] text-blue-600 font-extrabold block uppercase tracking-wider">{currentUser.role}</span>
+                                    </div>
+                                    <i className="fa-solid fa-gear text-slate-400 text-xs ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Navigation Tabs Bar */}
+                        <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2 overflow-x-auto no-scrollbar border-t border-slate-100 pt-1">
+                            {[
+                                { id: 'stream', label: 'Class Stream', icon: 'fa-comments' },
+                                { id: 'classwork', label: 'Coursework & Tasks', icon: 'fa-list-check' },
+                                { id: 'manuals', label: 'Lesson Handouts', icon: 'fa-book-open' },
+                                { id: 'grading', label: isTeacher ? 'Gradebook Inspector' : 'My Grades', icon: 'fa-chart-simple' },
+                                { id: 'roster', label: 'Class Roster', icon: 'fa-users' },
+                                { id: 'accounts', label: 'Registration & Accounts', icon: 'fa-user-gear' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`py-3 px-4 text-xs font-extrabold border-b-2 flex items-center space-x-2 transition whitespace-nowrap ${
+                                        activeTab === tab.id
+                                            ? 'border-blue-700 text-blue-700 bg-blue-50/50 rounded-t-xl'
+                                            : 'border-transparent text-slate-500 hover:text-blue-900 hover:border-slate-300'
+                                    }`}
+                                >
+                                    <i className={`fa-solid ${tab.icon}`}></i>
+                                    <span>{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </header>
+
+                    {/* MAIN PORTAL BODY */}
+                    <main className="flex-1 max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+                        {/* HERO BANNER */}
+                        <div className={`relative rounded-3xl p-6 sm:p-8 text-white shadow-xl overflow-hidden bg-gradient-to-r ${activeSection.color}`}>
+                            <div className="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none flex items-center pr-10">
+                                <i className="fa-solid fa-running text-[180px]"></i>
+                            </div>
+
+                            <div className="relative z-10 space-y-2 max-w-3xl">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest text-white border border-white/20">
+                                        {activeSection.subjectCode}
+                                    </span>
+                                    <span className="bg-blue-400/30 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-blue-100 border border-white/10">
+                                        Section: {activeSection.sectionName}
+                                    </span>
+                                    <span className="bg-amber-400/30 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-amber-200 border border-white/10 uppercase">
+                                        Role: {currentUser.role}
+                                    </span>
+                                </div>
+
+                                <h1 className="font-google font-extrabold text-2xl sm:text-3xl lg:text-4xl tracking-tight leading-snug">
+                                    {activeSection.subjectTitle}
+                                </h1>
+
+                                <p className="text-xs sm:text-sm text-blue-100 font-medium">
+                                    Program: <strong>{activeSection.courseProgram}</strong> | Schedule: <strong>{activeSection.schedule}</strong> | Venue: <strong>{activeSection.room}</strong>
+                                </p>
+
+                                <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-mono bg-black/20 p-2.5 rounded-2xl w-fit border border-white/10">
+                                    <span>Instructor: <strong>Prof. Shane Ian Atad</strong></span>
+                                    <span>•</span>
+                                    <span>Join Code: <strong className="text-amber-300">{activeSection.joinCode}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* TAB 1: STREAM */}
+                        {activeTab === 'stream' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <div className="space-y-4 lg:col-span-1">
+                                    <div className="glass-card rounded-3xl p-5 border border-blue-200 space-y-3">
+                                        <h3 className="font-google font-bold text-sm text-blue-950 flex items-center">
+                                            <i className="fa-solid fa-clock text-blue-600 mr-2"></i> Upcoming Tasks
+                                        </h3>
+                                        {sectionAssignments.length === 0 ? (
+                                            <p className="text-xs text-slate-500 italic">No upcoming tasks due!</p>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                {sectionAssignments.slice(0, 3).map(asg => (
+                                                    <div key={asg.id} className="bg-blue-50/60 p-3 rounded-2xl border border-blue-100 text-xs space-y-1">
+                                                        <span className="font-bold text-blue-950 block">{asg.title}</span>
+                                                        <span className="text-[11px] text-slate-500 block font-medium">Due: {asg.dueDate} • {asg.points} pts</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-2 xl:col-span-3 space-y-4">
+                                    {isTeacher && (
+                                        <div className="glass-card rounded-3xl p-4 border border-blue-200 flex items-center justify-between shadow-sm">
+                                            <div className="flex items-center space-x-3">
+                                                <img src={currentUser.avatar} className="w-10 h-10 rounded-xl object-cover" />
+                                                <span className="text-xs text-slate-500 font-medium">Announce something to your {activeSection.sectionName} class...</span>
+                                            </div>
+                                            <button onClick={() => setIsPostAnnouncementOpen(true)} className="btn-navy-primary text-xs font-bold px-4 py-2 rounded-xl shadow">
+                                                <i className="fa-solid fa-bullhorn mr-1.5"></i> Post
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {sectionAnnouncements.map(ann => (
+                                        <div key={ann.id} className="glass-card rounded-3xl p-6 border border-slate-200 space-y-4 shadow-sm">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-center space-x-3">
+                                                    <img src={INITIAL_REGISTERED_ACCOUNTS[0].avatar} className="w-10 h-10 rounded-2xl object-cover border border-blue-200" />
+                                                    <div>
+                                                        <strong className="text-xs text-blue-950 block">{ann.author}</strong>
+                                                        <span className="text-[10px] text-slate-400 font-medium">{ann.date}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h4 className="font-google font-bold text-sm text-blue-950">{ann.title}</h4>
+                                            <p className="text-xs text-slate-700 leading-relaxed">{ann.content}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 2: COURSEWORK */}
+                        {activeTab === 'classwork' && (
+                            <div className="space-y-6">
+                                <div className="glass-card rounded-3xl p-5 border border-blue-200 flex items-center justify-between">
+                                    <h3 className="font-google font-bold text-lg text-blue-950">Coursework & Tasks</h3>
+                                    {isTeacher && (
+                                        <button onClick={() => setIsCreateAssignmentOpen(true)} className="btn-navy-primary px-4 py-2 rounded-xl text-xs font-bold shadow">
+                                            + Add Coursework
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="space-y-4">
+                                    {sectionAssignments.map(asg => {
+                                        const mySub = submissions.find(s => s.assignmentId === asg.id && s.studentId === currentUser.id);
+
+                                        return (
+                                            <div key={asg.id} className="glass-card rounded-3xl p-6 border border-slate-200 space-y-4 shadow-sm">
+                                                <div className="flex justify-between items-center">
+                                                    <h4 className="font-google font-bold text-base text-blue-950">{asg.title}</h4>
+                                                    <span className="text-xs font-bold text-blue-900">{asg.points} Points</span>
+                                                </div>
+                                                <p className="text-xs text-slate-700">{asg.instructions}</p>
+
+                                                {!isTeacher && (
+                                                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                                        <span className="text-xs font-bold text-slate-600">{mySub ? `Status: Turned In (${mySub.submittedAt})` : 'Not Turned In'}</span>
+                                                        <button onClick={() => setSubmitAssignmentTarget(asg)} className="btn-navy-primary font-bold px-4 py-2 rounded-xl text-xs shadow">
+                                                            {mySub ? 'Resubmit Work' : 'Turn In Work'}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 3: LESSON MANUALS */}
+                        {activeTab === 'manuals' && (
+                            <div className="space-y-6">
+                                <div className="glass-card rounded-3xl p-5 border border-blue-200 flex items-center justify-between">
+                                    <h3 className="font-google font-bold text-lg text-blue-950">PE Modules & Handouts</h3>
+                                    {isTeacher && (
+                                        <button onClick={() => setIsAddMaterialOpen(true)} className="btn-navy-primary text-xs font-bold px-4 py-2 rounded-xl shadow">
+                                            Upload Handout
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {sectionMaterials.map(mat => (
+                                        <div key={mat.id} className="glass-card rounded-3xl p-5 border border-slate-200 space-y-3 shadow-sm">
+                                            <h4 className="font-google font-bold text-sm text-blue-950">{mat.title}</h4>
+                                            <p className="text-xs text-slate-600">{mat.description}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 4: GRADEBOOK */}
+                        {activeTab === 'grading' && (
+                            <div className="space-y-6">
+                                <div className="glass-card rounded-3xl p-5 border border-blue-200">
+                                    <h3 className="font-google font-bold text-lg text-blue-950">Gradebook Inspector</h3>
+                                </div>
+
+                                <div className="glass-card rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                                    <table className="w-full text-left text-xs">
+                                        <thead className="bg-blue-50/80 uppercase font-extrabold text-[10px]">
+                                            <tr>
+                                                <th className="p-4">Student Info</th>
+                                                <th className="p-4">Submitted Date</th>
+                                                <th className="p-4">Grade Score</th>
+                                                <th className="p-4 text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {submissions.map(sub => (
+                                                <tr key={sub.id}>
+                                                    <td className="p-4 font-bold text-blue-950">{sub.studentName}</td>
+                                                    <td className="p-4 text-slate-500">{sub.submittedAt}</td>
+                                                    <td className="p-4 font-extrabold text-emerald-700">{sub.grade !== null ? `${sub.grade} pts` : 'Ungraded'}</td>
+                                                    <td className="p-4 text-right">
+                                                        <button onClick={() => setInspectSubmission(sub)} className="btn-navy-primary font-bold px-3 py-1.5 rounded-xl text-xs shadow">
+                                                            Inspect
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 5: ROSTER */}
+                        {activeTab === 'roster' && (
+                            <div className="space-y-6">
+                                <div className="glass-card rounded-3xl p-5 border border-blue-200">
+                                    <h3 className="font-google font-bold text-lg text-blue-950">Class Enrolled Roster</h3>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {sectionStudents.map(std => (
+                                        <div key={std.id} className="glass-card rounded-3xl p-4 border border-slate-200 flex items-center justify-between shadow-sm">
+                                            <div className="flex items-center space-x-3">
+                                                <img src={std.avatar} className="w-11 h-11 rounded-2xl object-cover" />
+                                                <div className="text-xs">
+                                                    <strong className="text-blue-950 block text-sm">{std.name}</strong>
+                                                    <span className="text-[10px] text-slate-500 font-mono">ID: {std.studentIdNo}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {}
+                        {activeTab === 'accounts' && (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    {/* Account Registration Form */}
+                                    <div className="glass-card rounded-3xl p-6 border border-blue-200 space-y-4">
+                                        <div className="border-b border-slate-200 pb-3">
+                                            <h3 className="font-google font-bold text-lg text-blue-950 flex items-center">
+                                                <i className="fa-solid fa-user-plus text-blue-600 mr-2"></i> Register New Account
+                                            </h3>
+                                            <p className="text-xs text-slate-500">Create a student, teacher, or admin account.</p>
+                                        </div>
+
+                                        {regMessage && (
+                                            <div className="bg-emerald-50 border border-emerald-300 text-emerald-900 p-3 rounded-2xl text-xs font-bold flex items-center space-x-2">
+                                                <i className="fa-solid fa-circle-check text-emerald-600"></i>
+                                                <span>{regMessage}</span>
+                                            </div>
+                                        )}
+
+                                        <form onSubmit={handleRegisterAccount} className="space-y-3 text-xs">
+                                            <div>
+                                                <label className="block font-bold text-slate-700 mb-1">Full Name *</label>
+                                                <input
+                                                    required
+                                                    value={regForm.name}
+                                                    onChange={(e) => setRegForm({...regForm, name: e.target.value})}
+                                                    placeholder="e.g. Maria Santos"
+                                                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800"
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="block font-bold text-slate-700 mb-1">ID Number *</label>
+                                                    <input
+                                                        required
+                                                        value={regForm.studentIdNo}
+                                                        onChange={(e) => setRegForm({...regForm, studentIdNo: e.target.value})}
+                                                        placeholder="2025-09912"
+                                                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block font-bold text-slate-700 mb-1">Role *</label>
+                                                    <select
+                                                        value={regForm.role}
+                                                        onChange={(e) => setRegForm({...regForm, role: e.target.value})}
+                                                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800"
+                                                    >
+                                                        <option value="student">Student</option>
+                                                        <option value="teacher">PE Instructor</option>
+                                                        <option value="admin">Administrator</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block font-bold text-slate-700 mb-1">School Email *</label>
+                                                <input
+                                                    required
+                                                    type="email"
+                                                    value={regForm.email}
+                                                    onChange={(e) => setRegForm({...regForm, email: e.target.value})}
+                                                    placeholder="m.santos@student.edu.ph"
+                                                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800"
+                                                />
+                                            </div>
+
+                                            <button type="submit" className="w-full btn-navy-primary py-2.5 rounded-xl font-bold text-xs shadow mt-2">
+                                                Complete Account Registration
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    {/* Registered System Accounts & Admin Transfer Panel */}
+                                    <div className="lg:col-span-2 glass-card rounded-3xl p-6 border border-blue-200 space-y-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                                            <div>
+                                                <h3 className="font-google font-bold text-lg text-blue-950 flex items-center">
+                                                    <i className="fa-solid fa-users-gear text-blue-600 mr-2"></i> System Accounts & Admin Roles
+                                                </h3>
+                                                <p className="text-xs text-slate-500">Assign admin privileges, transfer main department ownership, or switch personas.</p>
+                                            </div>
+
+                                            {isAdmin && (
+                                                <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto">
+                                                    <i className="fa-solid fa-crown mr-1"></i> Admin Access Granted
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            {accounts.map(acc => {
+                                                const isCurrent = acc.id === currentUser.id;
+
+                                                return (
+                                                    <div
+                                                        key={acc.id}
+                                                        className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                                                            isCurrent ? 'bg-blue-50/90 border-blue-400 shadow-sm' : 'bg-white border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center space-x-3">
+                                                            <img src={acc.avatar} className="w-12 h-12 rounded-2xl object-cover border-2 border-blue-200" />
+                                                            <div className="text-xs">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <strong className="text-blue-950 text-sm">{acc.name}</strong>
+                                                                    {acc.isPrimaryAdmin && (
+                                                                        <span className="bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
+                                                                            <i className="fa-solid fa-crown mr-1"></i> Primary Admin
+                                                                        </span>
+                                                                    )}
+                                                                    {isCurrent && (
+                                                                        <span className="bg-emerald-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                                                                            Active Persona
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <span className="text-[11px] text-slate-500 font-mono block">ID: {acc.studentIdNo} • {acc.email}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+                                                            {/* DYNAMIC ROLE CHANGE CONTROL FOR ADMINS */}
+                                                            {isAdmin ? (
+                                                                <select
+                                                                    value={acc.role}
+                                                                    onChange={(e) => handleToggleAccountRole(acc.id, e.target.value)}
+                                                                    className="bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold rounded-xl px-2 py-1.5 focus:outline-none"
+                                                                >
+                                                                    <option value="student">Student</option>
+                                                                    <option value="teacher">PE Instructor</option>
+                                                                    <option value="admin">Administrator</option>
+                                                                </select>
+                                                            ) : (
+                                                                <span className="text-[10px] font-extrabold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full uppercase">
+                                                                    {acc.role}
+                                                                </span>
+                                                            )}
+
+                                                            {/* TRANSFER PRIMARY ADMIN BUTTON */}
+                                                            {isAdmin && !acc.isPrimaryAdmin && (
+                                                                <button
+                                                                    onClick={() => setTransferAdminTarget(acc)}
+                                                                    className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold px-2.5 py-1.5 rounded-xl transition"
+                                                                    title="Transfer Primary Admin Rights"
+                                                                >
+                                                                    <i className="fa-solid fa-crown"></i>
+                                                                </button>
+                                                            )}
+
+                                                            <button
+                                                                onClick={() => setCurrentUserId(acc.id)}
+                                                                disabled={isCurrent}
+                                                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                                                                    isCurrent ? 'bg-slate-200 text-slate-500 cursor-default' : 'btn-navy-primary shadow'
+                                                                }`}
+                                                            >
+                                                                {isCurrent ? 'Logged In' : 'Switch Persona'}
+                                                            </button>
+
+                                                            {isAdmin && !acc.isPrimaryAdmin && (
+                                                                <button
+                                                                    onClick={() => setDeleteTarget({
+                                                                        type: 'Account Profile',
+                                                                        name: acc.name,
+                                                                        onConfirm: () => setAccounts(prev => prev.filter(a => a.id !== acc.id))
+                                                                    })}
+                                                                    className="text-slate-400 hover:text-rose-600 p-1.5 transition"
+                                                                    title="Delete Account"
+                                                                >
+                                                                    <i className="fa-solid fa-trash-can"></i>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* MODAL: TRANSFER PRIMARY ADMIN RIGHTS */}
+                    {transferAdminTarget && (
+                        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="glass-card rounded-3xl max-w-sm w-full p-6 border border-amber-300 text-center space-y-4 shadow-2xl">
+                                <div className="w-12 h-12 rounded-full bg-amber-100 border border-amber-300 text-amber-600 flex items-center justify-center text-xl mx-auto">
+                                    <i className="fa-solid fa-crown"></i>
+                                </div>
+                                <h3 className="font-google font-bold text-lg text-slate-900">Transfer Primary Admin Role?</h3>
+                                <p className="text-xs text-slate-600">
+                                    Are you sure you want to transfer primary department ownership to <strong>{transferAdminTarget.name}</strong>?
+                                </p>
+                                <div className="flex space-x-2 pt-2">
+                                    <button onClick={() => setTransferAdminTarget(null)} className="flex-1 py-2 font-bold text-slate-500 hover:bg-slate-100 rounded-xl text-xs">Cancel</button>
+                                    <button
+                                        onClick={() => handleTransferPrimaryAdmin(transferAdminTarget.id)}
+                                        className="flex-1 py-2 font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs shadow-md"
+                                    >
+                                        Transfer Ownership
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL: DELETE CONFIRMATION */}
+                    {deleteTarget && (
+                        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="glass-card rounded-3xl max-w-sm w-full p-6 border border-blue-200 text-center space-y-4 shadow-2xl">
+                                <div className="w-12 h-12 rounded-full bg-rose-100 border border-rose-300 text-rose-600 flex items-center justify-center text-xl mx-auto">
+                                    <i className="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <h3 className="font-google font-bold text-lg text-slate-900">Remove {deleteTarget.type}?</h3>
+                                <p className="text-xs text-slate-600">Are you sure you want to remove <strong>"{deleteTarget.name}"</strong>?</p>
+                                <div className="flex space-x-2 pt-2">
+                                    <button onClick={() => setDeleteTarget(null)} className="flex-1 py-2 font-bold text-slate-500 hover:bg-slate-100 rounded-xl text-xs">Cancel</button>
+                                    <button
+                                        onClick={() => {
+                                            deleteTarget.onConfirm();
+                                            setDeleteTarget(null);
+                                        }}
+                                        className="flex-1 py-2 font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs shadow-md"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
